@@ -1,5 +1,7 @@
 # Coffee Shop Backend
 
+[Part 2: JWT User Authentication & Protected Routes](#coffee-shop-backend---part-2)
+
 ## Overview / Objective
 
 The Coffee Shop Backend is a Node.js-based Express application that serves as the backend for an e-commerce coffee shop. It provides APIs for managing products with full CRUD (Create, Read, Update, Delete) functionality. The backend uses MongoDB with Mongoose for database operations, allowing efficient storage and retrieval of product data.
@@ -230,3 +232,246 @@ This assignment fulfilled all the requirements:
 - Connecting to MongoDB using Mongoose.
 - Defining the Product model.
 - Implementing and testing CRUD operations for the products API.
+
+---
+
+# Coffee Shop Backend - Part 2
+
+## Overview
+
+This section builds upon the Coffee Shop Backend by adding user authentication functionality using JSON Web Tokens (JWT). The main features include:
+
+- Setting up user authentication with JWT.
+- Implementing registration and login endpoints.
+- Protecting routes using authentication middleware.
+- Testing the API.
+
+## Setup
+
+### Additional Dependencies
+
+To enable user authentication, the following dependencies were installed:
+
+```bash
+npm install bcryptjs jsonwebtoken
+```
+
+### Environment Variables
+
+Updated `.env` file to include the following variables:
+
+```env
+MONGO_URL=<your_mongodb_connection_string>
+JWT_SECRET=<your_jwt_secret_key>
+```
+
+### User Model
+
+The `User` model was created in `models/user.js` to define the schema for user data and manage password hashing.
+
+```javascript
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, default: "user", enum: ["user", "admin"] },
+});
+
+// Hash the password before saving the user
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Method to compare passwords
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
+```
+
+## Implementing Registration and Login Endpoints
+
+### Routes
+
+Authentication routes were implemented in `routes/auth.js` to handle user registration and login.
+
+#### Register a User
+
+```javascript
+router.post("/register", async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    const user = new User({ name, email, password, role });
+    await user.save();
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+```
+
+#### Login a User
+
+```javascript
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: "Invalid email or password" });
+    }
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Invalid email or password" });
+    }
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+    res.json({ token });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+```
+
+## Creating Authentication Middleware
+
+The middleware `auth` was created in `middleware/auth.js` to protect routes by verifying JWT tokens.
+
+```javascript
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+
+const auth = (req, res, next) => {
+  let token;
+
+  try {
+    token = req.header("Authorization").replace("Bearer ", "");
+  } catch (error) {
+    return res
+      .status(401)
+      .json({ message: "Authorization header is missing." });
+  }
+
+  if (!token) {
+    return res.status(401).json({ error: "Access denied. No token provided." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(400).json({ error: "Invalid token." });
+  }
+};
+
+module.exports = auth;
+```
+
+## Integrating Routes with the Server
+
+The `auth` routes and middleware were integrated into the server in `index.js`:
+
+```javascript
+const express = require("express");
+const mongoose = require("mongoose");
+require("dotenv").config();
+const productRoutes = require("./routes/products");
+const authRoutes = require("./routes/auth");
+const auth = require("./middleware/auth");
+const app = express();
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Connect to MongoDB
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
+
+// Authentication routes
+app.use("/auth", authRoutes);
+
+// Protect product routes
+app.use("/products", auth, productRoutes);
+
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
+});
+```
+
+## Testing the API
+
+The API was tested using Thunder Client. Below are the steps and screenshots:
+
+### 1. Register a User
+
+**Method:** POST  
+**URL:** `http://localhost:3000/auth/register`  
+**Body:**
+
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "user"
+}
+```
+
+**Screenshot:**  
+ ![Register User](image-8.png)
+
+### 2. Login a User
+
+**Method:** POST  
+**URL:** `http://localhost:3000/auth/login`  
+**Body:**
+
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+**Screenshot:**  
+![Login User](image-9.png)
+
+### 3. Access Protected Product Routes
+
+**Method:** GET  
+**URL:** `http://localhost:3000/products`  
+**Headers:**
+
+```plaintext
+Authorization: Bearer <your_jwt_token>
+```
+
+**Screenshot:**  
+![Get All Products (Protected Route)](image-7.png)
