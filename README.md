@@ -1,6 +1,7 @@
 # Coffee Shop Backend
 
-[Part 2: JWT User Authentication & Protected Routes](#coffee-shop-backend---part-2)
+- [Part 2: JWT User Authentication & Protected Routes](#coffee-shop-backend---part-2)
+- [Part 3: Expanding API and Error Handling](#coffee-shop-backend---part-3)
 
 ## Overview / Objective
 
@@ -475,3 +476,191 @@ Authorization: Bearer <your_jwt_token>
 
 **Screenshot:**  
 ![Get All Products (Protected Route)](image-7.png)
+
+## Coffee Shop Backend - Part 3
+
+### Overview
+
+In this continuation of the Coffee Shop Backend project, we expanded the API's functionality by implementing additional endpoints, refining existing product routes, handling errors effectively, and testing the API thoroughly. Below are the steps taken in this iteration:
+
+---
+
+### Step 1: Adding More Endpoints to the API
+
+#### User Routes (`routes/users.js`)
+
+- **CRUD Operations for Users**: Added routes to create, read, update, and delete users, including admin-only restrictions for sensitive operations.
+- **Authentication**: Integrated the `auth` middleware to ensure proper role-based access.
+
+```javascript
+// routes/users.js
+router.get("/", auth, async (req, res) => {
+  /* Get all users */
+});
+router.get("/:id", auth, async (req, res) => {
+  /* Get single user by ID */
+});
+router.put("/:id", auth, async (req, res) => {
+  /* Update user by ID */
+});
+router.delete("/:id", auth, async (req, res) => {
+  /* Delete user by ID (admin only) */
+});
+```
+
+---
+
+### Step 2: Refining Product Endpoints
+
+#### Product Routes (`routes/products.js`)
+
+- **Category Filtering**: Enhanced the `GET /products` endpoint to include optional category-based filtering using query parameters.
+- **CRUD Refinements**: Improved error handling and validation for create, update, and delete operations.
+
+```javascript
+// routes/products.js
+router.get("/", async (req, res) => {
+  /* Get all products or filter by category */
+});
+router.post("/", async (req, res) => {
+  /* Create a new product */
+});
+router.put("/:id", async (req, res) => {
+  /* Update a product */
+});
+router.delete("/:id", async (req, res) => {
+  /* Delete a product */
+});
+```
+
+---
+
+### Step 3: Handling Errors and Edge Cases
+
+#### Error Handling Middleware (`middleware/errorHandler.js`)
+
+- Centralized error handling to manage server-side issues and provide consistent error responses.
+- Logged errors to the console for easier debugging.
+
+```javascript
+// middleware/errorHandler.js
+const errorHandler = (err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
+};
+
+module.exports = errorHandler;
+```
+
+---
+
+### Step 4: Integrating with the Server
+
+#### `index.js`
+
+- **Integration**: Connected the new `user` routes and error handling middleware to the main server file.
+- **Authentication Middleware**: Ensured protected routes are accessible only to authenticated users.
+
+```javascript
+// index.js
+const userRoutes = require("./routes/users");
+const errorHandler = require("./middleware/errorHandler");
+
+app.use("/users", auth, userRoutes);
+app.use(errorHandler);
+```
+
+---
+
+### Step 5: Testing the API
+
+- **Tool Used**: Thunder Client
+
+#### Test Results
+
+1. **Get All Users (Admin Only)**:
+   - **Method**: GET
+   - **URL**: `/users`
+   - **Headers**:
+     - Authorization: Bearer `<token>`
+   - **Screenshot**:
+     ![Get All User (Admin)](image-10.png)
+2. **Get a Single User by ID**:
+
+   - **Method**: GET
+   - **URL**: `/users/1`
+   - **Headers**:
+     - Authorization: Bearer `<token>`
+   - **Screenshot**:
+     ![Get a Single User by ID](image-11.png)
+
+3. **Update a User**:
+   - **Method**: PUT
+   - **URL**: `/users/1`
+   - **Headers**:
+     - Authorization: Bearer `<token>`
+   - **Body**:
+     ```json
+     {
+       "name": "Jane Doe",
+       "email": "jane@example.com"
+     }
+     ```
+   - **Screenshot**:
+     ![Update a User by ID](image-12.png)
+4. **Delete a User (Admin-Only)**:
+
+   - **Method**: DELETE
+   - **URL**: `/users/1`
+   - **Headers**:
+     - Authorization: Bearer `<admin-token>`
+   - **Screenshot**:
+     ![Delete a User by ID](image-13.png)
+
+5. **Get Products by Category**:
+
+   - **Method**: GET
+   - **URL**: `/products?category=mugs`
+   - **Screenshot**:
+     ![Get All Products or Filter by Category](image-14.png)
+
+6. **Get a Single Product by ID**:
+
+   - **Method**: GET
+   - **URL**: `/products/1`
+   - **Screenshot**:
+     ![Get a Single Product by ID](image-15.png)
+
+7. **Update a Product**:
+
+   - **Method**: PUT
+   - **URL**: `/products/1`
+   - **Headers**:
+     - Authorization: Bearer `<token>`
+   - **Body**:
+     ```json
+     {
+       "name": "Large Coffee Mug",
+       "description": "A large coffee mug, perfect for your morning coffee.",
+       "price": 14.99,
+       "category": "mugs",
+       "stock": 50,
+       "imageUrl": "http://example.com/mug.jpg"
+     }
+     ```
+   - **Screenshot**:
+     ![Update a Product by ID](image-16.png)
+
+8. **Delete a Product**:
+   - **Method**: DELETE
+   - **URL**: `/products/1`
+   - **Headers**:
+     - Authorization: Bearer `<token>`
+   - **Screenshot**:
+     ![Delete a Product by ID](image-17.png)
+
+---
+
+### Conclusion
+
+This iteration successfully expanded the API's capabilities, improved error handling, and ensured a robust testing process.
