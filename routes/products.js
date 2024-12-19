@@ -2,17 +2,6 @@ const Router = require("express").Router;
 const productRoutes = Router();
 const Product = require("../models/product");
 
-// Get all products
-productRoutes.get("/", async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (error) {
-    console.error("Error retrieving all products: ", error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // Create a new product
 productRoutes.post("/", async (req, res) => {
   const data = req.body;
@@ -27,9 +16,22 @@ productRoutes.post("/", async (req, res) => {
     //save to database
     const savedProduct = await newProduct.save();
 
-    res.json(savedProduct);
+    res.status(201).json(savedProduct);
   } catch (error) {
     console.error("Error adding new product: ", error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Get all products or filter by category
+productRoutes.get("/", async (req, res) => {
+  try {
+    const { category } = req.query;
+    const filter = category ? { category } : {};
+    const products = await Product.find(filter);
+    res.json(products);
+  } catch (error) {
+    console.error("Error retrieving all products: ", error);
     res.status(500).json({ error: error.message });
   }
 });
