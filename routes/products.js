@@ -2,9 +2,11 @@ const express = require("express");
 const productRoutes = express.Router();
 const Product = require("../models/product");
 const upload = require("../middleware/upload");
+const auth = require("../middleware/auth");
+const role = require("../middleware/role");
 
-// // Create a new product
-productRoutes.post("/", upload, async (req, res) => {
+// // Create a new product w/ image upload (admin only)
+productRoutes.post("/", auth, role("admin"), upload, async (req, res) => {
   if (!req.file) {
     console.error("File not uploaded");
     return res.status(400).json({ error: "File upload failed" });
@@ -84,7 +86,7 @@ productRoutes.get("/:id", async (req, res) => {
 });
 
 //Update a product by ID
-productRoutes.put("/:id", upload, async (req, res) => {
+productRoutes.put("/:id", auth, role("admin"), upload, async (req, res) => {
   try {
     const { name, description, price, category, stock } = req.body;
 
