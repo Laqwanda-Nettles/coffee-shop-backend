@@ -579,22 +579,25 @@ app.use(errorHandler);
 #### Test Results
 
 1. **Get All Users (Admin Only)**:
+
    - **Method**: GET
    - **URL**: `/users`
    - **Headers**:
      - Authorization: Bearer `<token>`
-   - **Screenshot**:
+   - **Screenshot**:  
      ![Get All User (Admin)](image-10.png)
+
 2. **Get a Single User by ID**:
 
    - **Method**: GET
    - **URL**: `/users/1`
    - **Headers**:
      - Authorization: Bearer `<token>`
-   - **Screenshot**:
+   - **Screenshot**:  
      ![Get a Single User by ID](image-11.png)
 
 3. **Update a User**:
+
    - **Method**: PUT
    - **URL**: `/users/1`
    - **Headers**:
@@ -606,29 +609,30 @@ app.use(errorHandler);
        "email": "jane@example.com"
      }
      ```
-   - **Screenshot**:
+   - **Screenshot**:  
      ![Update a User by ID](image-12.png)
+
 4. **Delete a User (Admin-Only)**:
 
    - **Method**: DELETE
    - **URL**: `/users/1`
    - **Headers**:
      - Authorization: Bearer `<admin-token>`
-   - **Screenshot**:
+   - **Screenshot**:  
      ![Delete a User by ID](image-13.png)
 
 5. **Get Products by Category**:
 
    - **Method**: GET
    - **URL**: `/products?category=mugs`
-   - **Screenshot**:
+   - **Screenshot**:  
      ![Get All Products or Filter by Category](image-14.png)
 
 6. **Get a Single Product by ID**:
 
    - **Method**: GET
    - **URL**: `/products/1`
-   - **Screenshot**:
+   - **Screenshot**:  
      ![Get a Single Product by ID](image-15.png)
 
 7. **Update a Product**:
@@ -648,7 +652,7 @@ app.use(errorHandler);
        "imageUrl": "http://example.com/mug.jpg"
      }
      ```
-   - **Screenshot**:
+   - **Screenshot**:  
      ![Update a Product by ID](image-16.png)
 
 8. **Delete a Product**:
@@ -656,7 +660,7 @@ app.use(errorHandler);
    - **URL**: `/products/1`
    - **Headers**:
      - Authorization: Bearer `<token>`
-   - **Screenshot**:
+   - **Screenshot**:  
      ![Delete a Product by ID](image-17.png)
 
 ---
@@ -664,3 +668,135 @@ app.use(errorHandler);
 ### Conclusion
 
 This iteration successfully expanded the API's capabilities, improved error handling, and ensured a robust testing process.
+
+---
+
+# Coffee Shop Backend - Part 4
+
+This section continues the development of the Coffee Shop Backend, focusing on pagination for product listings, handling file uploads for product images, and integrating these features into the API.
+
+## Features Implemented
+
+### 1. Pagination for Product Listings
+
+- Updated the `routes/products.js` file to support pagination.
+- Features include:
+  - Query parameters for `page` and `limit` to control the number of products returned per page.
+  - Filtering by `category`.
+  - Sorting by fields such as `price` or `name` in ascending or descending order.
+- Example Request:
+  ```http
+  GET /products?page=1&limit=10&category=coffee&sortBy=price&sortOrder=desc
+  ```
+- Example Response:
+  ```json
+  {
+    "total": 50,
+    "products": [
+      { "name": "Coffee Mug", "price": 12.99 },
+      { "name": "Espresso Cup", "price": 9.99 }
+    ]
+  }
+  ```
+
+### 2. File Uploads for Product Images
+
+- Integrated the `multer` middleware for handling file uploads.
+- File upload capabilities were added to `routes/products.js`.
+- Uploaded images are stored in the `uploads/` directory and are served as static files.
+
+#### Middleware: `middleware/uploads.js`
+
+- Configures file upload parameters:
+  - Storage engine to save files with a timestamped filename.
+  - File size limit of 1MB.
+  - Validation to accept only image files (`jpeg`, `jpg`, `png`, `gif`, `webp`).
+
+#### Server Integration
+
+- Updated the main server file (`index.js`) to serve the `uploads` folder as static files:
+
+  ```javascript
+  const path = require("path");
+
+  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+  ```
+
+### 3. Updated Product Routes for File Uploads
+
+- Modified `POST /products` to include file uploads and associate the uploaded image URL with the product.
+- Modified `PUT /products/:id` to allow updating product details along with an optional new image.
+
+#### Example Request (Create Product):
+
+```http
+POST /products
+Headers: Authorization: Bearer <token>
+Body (Form Data):
+  name: Coffee Mug
+  description: A durable coffee mug.
+  price: 14.99
+  category: mugs
+  stock: 200
+  image: [Upload Image File]
+```
+
+### 4. API Testing
+
+#### Tools Used
+
+- Postman (Desktop version) for creating and testing API requests.
+
+#### Tests Performed:
+
+- **Create Product with Image Upload:** Successfully tested image upload functionality by submitting a POST request with form-data.
+- **Get All Products with Pagination & Filtering:** Verified that the API returns the correct paginated results and applies category filters.
+- **Update Product by ID:** Confirmed that updating a product's details, including its image, works as expected.
+
+### Screenshots
+
+1. **POST /products with image upload**:  
+   ![Create Product w/ Image Upload](image-18.png)
+2. **GET /products with pagination and filtering**:  
+   ![Get All products w/ pagination & filtering](image-19.png)
+3. **PUT /products/:id to update product**:  
+   ![Update product by id w/ image](image-20.png)
+
+---
+
+## What I Learned
+
+During the implementation of image uploads, I encountered issues where the `req.file` object was coming back as `undefined`. This resulted in the image URL being empty in the database. Debugging involved several steps:
+
+1. **Console Logging**:
+
+   - Verified that the middleware setup in `uploads.js` was correctly configured.
+   - Ensured that the request was properly formatted in Postman.
+
+2. **Testing Alternatives**:
+
+   - Used `curl` commands to test the API, which worked flawlessly, suggesting the issue was specific to Postman.
+
+3. **Identifying the Problem**:
+
+   - Discovered that the Postman extension for VS Code differed from the desktop version.
+   - Additionally, syncing files with OneDrive caused file path issues.
+
+4. **Solution**:
+   - Downloaded the Postman desktop version.
+   - Unsynced the project folder from OneDrive to resolve file upload path conflicts.
+
+### Insights Gained
+
+- **Debugging Skills**: Learned the importance of isolating issues by testing with different tools (e.g., Postman vs. `curl`).
+- **Environment Matters**: Realized how cloud syncing services like OneDrive can interfere with file handling.
+- **Tool-Specific Behaviors**: Understood that the Postman desktop app offers a more reliable environment for file uploads compared to the VS Code extension.
+
+---
+
+## Installed
+
+- To ensure file upload functionality, install the required `multer` package:
+  ```bash
+  npm install multer
+  ```
