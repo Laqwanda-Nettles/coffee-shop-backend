@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path");
 require("dotenv").config();
 const productRoutes = require("./routes/products");
 const authRoutes = require("./routes/auth");
@@ -11,6 +12,9 @@ const port = 3000;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+// Serve static files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Connect to MongoDB
 const mongoUrl = process.env.MONGO_URL;
