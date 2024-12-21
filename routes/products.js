@@ -1,35 +1,65 @@
-const Router = require("express").Router;
-const productRoutes = Router();
+const express = require("express");
+const productRoutes = express.Router();
 const Product = require("../models/product");
+const upload = require("../middleware/upload");
 
-// Create a new product
-productRoutes.post("/", async (req, res) => {
-  const data = req.body;
+// // Create a new product
+productRoutes.post("/", upload, async (req, res) => {
+  if (!req.file) {
+    console.error("File not uploaded");
+    return res.status(400).json({ error: "File upload failed" });
+  }
+
   try {
-    const newProduct = new Product({
-      name: data.name,
-      description: data.description,
-      price: data.price,
-      category: data.category,
+    const { name, description, price, category, stock } = req.body;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+
+    const product = new Product({
+      name,
+      description,
+      price,
+      category,
+      stock,
+      imageUrl,
     });
 
     //save to database
-    const savedProduct = await newProduct.save();
+    await product.save();
 
-    res.status(201).json(savedProduct);
+    res.status(201).json(product);
   } catch (error) {
     console.error("Error adding new product: ", error);
     res.status(400).json({ error: error.message });
   }
 });
 
-// Get all products or filter by category
+// Get all products with pagination and filter by category
 productRoutes.get("/", async (req, res) => {
   try {
-    const { category } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      category,
+      sortBy,
+      sortOrder = "asc",
+    } = req.query;
+
+    //filter based on the category (if provided)
     const filter = category ? { category } : {};
-    const products = await Product.find(filter);
-    res.json(products);
+
+    //sort based on the sortBy and sortOrder (if provided)
+    const sort = sortBy ? { [sortBy]: sortOrder === "asc" ? 1 : -1 } : {};
+
+    // Query the database to get products with filters, sorting, and pagination
+    const products = await Product.find(filter)
+      .sort(sort)
+      .limit(parseInt(limit))
+      .skip((page - 1) * limit);
+
+    // Send the total count and the retrieved products as a response
+    const total = await Product.countDocuments(filter);
+
+    res.json({ total, products });
   } catch (error) {
     console.error("Error retrieving all products: ", error);
     res.status(500).json({ error: error.message });
@@ -54,12 +84,22 @@ productRoutes.get("/:id", async (req, res) => {
 });
 
 //Update a product by ID
-productRoutes.put("/:id", async (req, res) => {
+productRoutes.put("/:id", upload, async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const { name, description, price, category, stock } = req.body;
+
+    const imageUrl = req.file
+      ? `/uploads/${req.file.filename}`
+      : req.body.imageUrl;
+
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { name, description, price, category, stock, imageUrl },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
