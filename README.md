@@ -2,6 +2,7 @@
 
 - [Part 2: JWT User Authentication & Protected Routes](#coffee-shop-backend---part-2)
 - [Part 3: Expanding API and Error Handling](#coffee-shop-backend---part-3)
+- [Part 4: Pagination and Handling File Uploads](#coffee-shop-backend---part-4)
 
 ## Overview / Objective
 
