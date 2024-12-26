@@ -801,3 +801,136 @@ During the implementation of image uploads, I encountered issues where the `req.
   ```bash
   npm install multer
   ```
+
+# Coffee Shop Backend - Final Update (Part 5)
+
+## Finalizing the API
+
+### Role-Based Access Control (RBAC)
+
+- **Middleware Implementation**:
+  Created `middleware/role.js` to define role-based access control. The middleware checks if the user's role matches the required role for accessing specific routes.
+
+  ```javascript
+  const role = (requiredRole) => {
+    return (req, res, next) => {
+      if (req.user.role !== requiredRole) {
+        return res.status(403).json({ error: "Access denied." });
+      }
+      next();
+    };
+  };
+
+  module.exports = role;
+  ```
+
+- **Protecting Routes**:
+  Updated `routes/products.js` to include role-based access control for administrative actions (e.g., adding, updating, and deleting products).
+
+### Input Validation
+
+- **Middleware Implementation**:
+  Created `middleware/validate.js` using Joi to validate product input fields for API requests.
+
+  ```javascript
+  const Joi = require("joi");
+
+  const validateProduct = (req, res, next) => {
+    const schema = Joi.object({
+      name: Joi.string().required(),
+      description: Joi.string().required(),
+      price: Joi.number().required(),
+      category: Joi.string().required(),
+      stock: Joi.number().required(),
+      imageUrl: Joi.string().uri(),
+    });
+
+    const { error } = schema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+    next();
+  };
+
+  module.exports = { validateProduct };
+  ```
+
+- **Route Integration**:
+  Integrated validation middleware into `routes/products.js` for routes like product creation and updates.
+
+## Preparing for Deployment
+
+### Updates to `index.js`
+
+- Added `.env` file for environment variables:
+  ```plaintext
+  PORT=3000
+  MONGODB_URL=your-mongodb-connection-string
+  JWT_SECRET=your_jwt_secret
+  ```
+- Updated `index.js` to use environment variables and ensure compatibility with deployment requirements.
+  ```javascript
+  require("dotenv").config();
+  const port = process.env.PORT || 3000;
+  ```
+
+## Deploying to Render.com
+
+### Deployment Steps
+
+1. **Account Setup**:
+   Created an account on [Render.com](https://render.com) and connected the GitHub repository containing the backend project.
+2. **Web Service Configuration**:
+   - Service Name: `coffee-shop-backend`
+   - Environment: Node
+   - Build Command: `npm install`
+   - Start Command: `node index.js`
+   - Environment Variables: Added the variables from `.env` file.
+3. **Deployment**:
+   Successfully deployed the API to Render.com.
+
+## Testing the Deployed API
+
+- **Endpoint Testing**:
+  Used Postman and Thunder Client to test all endpoints of the deployed API.
+
+  - Example:
+    - URL: `https://coffee-shop-backend-fubs.onrender.com/products`
+    - Method: `GET`
+  - Verified protected routes with authentication and role-based access.
+
+- **Screenshots**:
+  Screenshots of successful API tests in Postman.  
+  ![Deployed: Created product w/ img](image-21.png)
+
+  ![Deployed: Get all products w/ pagination + filtering](image-22.png)
+
+  ![Deployed: Update product by id](image-23.png)
+
+  ![Get Product by id](image-24.png)
+
+## Project Wrap-Up
+
+### Key Features Implemented
+
+1. **Authentication and Authorization**:
+   - User authentication with JWT.
+   - Role-based access control for admin and user permissions.
+2. **Product Management**:
+   - CRUD operations for products with image uploads.
+   - Pagination and filtering capabilities.
+3. **Middleware Development**:
+   - Authentication, role-based access control, and input validation middleware.
+   - Custom error handling.
+4. **Deployment**:
+   - Environment configuration for MongoDB, JWT secrets, and deployment to Render.com.
+5. **API Documentation**:
+   - Documented API endpoints for easy testing and usage.
+
+#### Challenges and Solutions
+
+- Overcame testing discrepancies between the Postman VS Code extension and desktop application by switching to the latter, which offered superior synchronization with API settings and environment management.
+
+#### Final Notes
+
+This project successfully demonstrates the development of a robust, scalable, and secure backend API for a coffee shop e-commerce platform. The API is fully tested and deployed, ready for integration with a frontend application.
