@@ -3,6 +3,7 @@
 - [Part 2: JWT User Authentication & Protected Routes](#coffee-shop-backend---part-2)
 - [Part 3: Expanding API and Error Handling](#coffee-shop-backend---part-3)
 - [Part 4: Pagination and Handling File Uploads](#coffee-shop-backend---part-4)
+- [Part 5: RBAC and Deploying](#coffee-shop-backend---final-update-part-5)
 
 ## Overview / Objective
 
@@ -156,23 +157,23 @@ module.exports = Product;
      }
      ```
    - **Screenshots:**  
-     ![Adding A Product](image.png)
+     ![Adding A Product](./screenshots/image.png)
 
-     ![Product Saved to Database](image-1.png)
+     ![Product Saved to Database](./screenshots/image-1.png)
 
 2. **Retrieve All Products**:
 
    - Method: GET
    - URL: `http://localhost:3000/products`
    - **Screenshots:**  
-     ![Get All Products](image-2.png)
+     ![Get All Products](./screenshots/image-2.png)
 
 3. **Retrieve a Single Product by ID**:
 
    - Method: GET
    - URL: `http://localhost:3000/products/<product_id>`
    - **Screenshots:**  
-     ![Get by Id](image-3.png)
+     ![Get by Id](./screenshots/image-3.png)
 
 4. **Update a Product**:
 
@@ -188,15 +189,15 @@ module.exports = Product;
      }
      ```
    - **Screenshots:**  
-     ![Update Product](image-4.png)
+     ![Update Product](./screenshots/image-4.png)
 
-     ![Update Saved to Database](image-5.png)
+     ![Update Saved to Database](./screenshots/image-5.png)
 
 5. **Delete a Product**:
    - Method: DELETE
    - URL: `http://localhost:3000/products/<product_id>`
    - **Screenshots:**  
-     ![Delete Product by Id](image-6.png)
+     ![Delete Product by Id](./screenshots/image-6.png)
 
 ### Workflow
 
@@ -262,10 +263,10 @@ npm install bcryptjs jsonwebtoken
 
 Updated `.env` file to include the following variables:
 
-```env
+````env
 MONGO_URL=<your_mongodb_connection_string>
 JWT_SECRET=<your_jwt_secret_key>
-```
+```./screenshots/
 
 ### User Model
 
@@ -305,7 +306,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
-```
+````
 
 ## Implementing Registration and Login Endpoints
 
@@ -447,7 +448,7 @@ The API was tested using Thunder Client. Below are the steps and screenshots:
 ```
 
 **Screenshot:**  
- ![Register User](image-8.png)
+ ![Register User](./screenshots/image-8.png)
 
 ### 2. Login a User
 
@@ -463,7 +464,7 @@ The API was tested using Thunder Client. Below are the steps and screenshots:
 ```
 
 **Screenshot:**  
-![Login User](image-9.png)
+![Login User](./screenshots/image-9.png)
 
 ### 3. Access Protected Product Routes
 
@@ -476,7 +477,7 @@ Authorization: Bearer <your_jwt_token>
 ```
 
 **Screenshot:**  
-![Get All Products (Protected Route)](image-7.png)
+![Get All Products (Protected Route)](./screenshots/image-7.png)
 
 ## Coffee Shop Backend - Part 3
 
@@ -586,7 +587,7 @@ app.use(errorHandler);
    - **Headers**:
      - Authorization: Bearer `<token>`
    - **Screenshot**:  
-     ![Get All User (Admin)](image-10.png)
+     ![Get All User (Admin)](./screenshots/image-10.png)
 
 2. **Get a Single User by ID**:
 
@@ -595,7 +596,7 @@ app.use(errorHandler);
    - **Headers**:
      - Authorization: Bearer `<token>`
    - **Screenshot**:  
-     ![Get a Single User by ID](image-11.png)
+     ![Get a Single User by ID](./screenshots/image-11.png)
 
 3. **Update a User**:
 
@@ -611,7 +612,7 @@ app.use(errorHandler);
      }
      ```
    - **Screenshot**:  
-     ![Update a User by ID](image-12.png)
+     ![Update a User by ID](./screenshots/image-12.png)
 
 4. **Delete a User (Admin-Only)**:
 
@@ -620,21 +621,21 @@ app.use(errorHandler);
    - **Headers**:
      - Authorization: Bearer `<admin-token>`
    - **Screenshot**:  
-     ![Delete a User by ID](image-13.png)
+     ![Delete a User by ID](./screenshots/image-13.png)
 
 5. **Get Products by Category**:
 
    - **Method**: GET
    - **URL**: `/products?category=mugs`
    - **Screenshot**:  
-     ![Get All Products or Filter by Category](image-14.png)
+     ![Get All Products or Filter by Category](./screenshots/image-14.png)
 
 6. **Get a Single Product by ID**:
 
    - **Method**: GET
    - **URL**: `/products/1`
    - **Screenshot**:  
-     ![Get a Single Product by ID](image-15.png)
+     ![Get a Single Product by ID](./screenshots/image-15.png)
 
 7. **Update a Product**:
 
@@ -654,7 +655,7 @@ app.use(errorHandler);
      }
      ```
    - **Screenshot**:  
-     ![Update a Product by ID](image-16.png)
+     ![Update a Product by ID](./screenshots/image-16.png)
 
 8. **Delete a Product**:
    - **Method**: DELETE
@@ -662,7 +663,7 @@ app.use(errorHandler);
    - **Headers**:
      - Authorization: Bearer `<token>`
    - **Screenshot**:  
-     ![Delete a Product by ID](image-17.png)
+     ![Delete a Product by ID](./screenshots/image-17.png)
 
 ---
 
@@ -757,11 +758,11 @@ Body (Form Data):
 ### Screenshots
 
 1. **POST /products with image upload**:  
-   ![Create Product w/ Image Upload](image-18.png)
+   ![Create Product w/ Image Upload](./screenshots/image-18.png)
 2. **GET /products with pagination and filtering**:  
-   ![Get All products w/ pagination & filtering](image-19.png)
+   ![Get All products w/ pagination & filtering](./screenshots/image-19.png)
 3. **PUT /products/:id to update product**:  
-   ![Update product by id w/ image](image-20.png)
+   ![Update product by id w/ image](./screenshots/image-20.png)
 
 ---
 
@@ -901,13 +902,13 @@ During the implementation of image uploads, I encountered issues where the `req.
 
 - **Screenshots**:
   Screenshots of successful API tests in Postman.  
-  ![Deployed: Created product w/ img](image-21.png)
+  ![Deployed: Created product w/ img](./screenshots/image-21.png)
 
-  ![Deployed: Get all products w/ pagination + filtering](image-22.png)
+  ![Deployed: Get all products w/ pagination + filtering](./screenshots/image-22.png)
 
-  ![Deployed: Update product by id](image-23.png)
+  ![Deployed: Update product by id](./screenshots/image-23.png)
 
-  ![Get Product by id](image-24.png)
+  ![Get Product by id](./screenshots/image-24.png)
 
 ## Project Wrap-Up
 
