@@ -120,11 +120,11 @@ productRoutes.put(
       const updatedProduct = await Product.findByIdAndUpdate(
         productId,
         {
-          name: name || existingProduct.name,
-          description: description || existingProduct.description,
-          price: price || existingProduct.price,
-          category: category || existingProduct.category,
-          stock: stock || existingProduct.stock,
+          name,
+          description,
+          price,
+          category,
+          stock,
           imageUrl,
         },
         {
