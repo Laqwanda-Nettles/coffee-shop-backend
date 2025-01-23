@@ -104,24 +104,40 @@ productRoutes.put(
     try {
       const { name, description, price, category, stock } = req.body;
 
-      const imageUrl = req.file
-        ? `/uploads/${req.file.filename}`
-        : req.body.imageUrl;
+      // Find the existing product to retrieve its current imageUrl
+      const existingProduct = await Product.findById(productId);
+      if (!existingProduct) {
+        return res.status(404).json({ error: "Product not found" });
+      }
 
-      const product = await Product.findByIdAndUpdate(
+      // Determine the image URL: keep the existing one if no new image is uploaded
+      const imageUrl = req.file ? req.file.path : existingProduct.imageUrl;
+
+      const updatedProduct = await Product.findByIdAndUpdate(
         req.params.id,
-        { name, description, price, category, stock, imageUrl },
+        {
+          name: name || existingProduct.name,
+          description: description || existingProduct.description,
+          price: price || existingProduct.price,
+          category: category || existingProduct.category,
+          stock: stock || existingProduct.stock,
+          imageUrl: imageUrl,
+        },
         {
           new: true,
           runValidators: true,
         }
       );
 
-      if (!product) {
-        return res.status(404).json({ error: "Product not found" });
-      }
+      // if (!product) {
+      //   return res.status(404).json({ error: "Product not found" });
+      // }
 
-      res.json(product);
+      // const imageUrl = req.file.path
+      //   ? `/uploads/${req.file.filename}`
+      //   : req.body.imageUrl;
+
+      res.json(updatedProduct);
     } catch (error) {
       console.error("Error updating product: ", error);
       res.status(400).json({ error: error.message });
