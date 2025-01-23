@@ -103,25 +103,29 @@ productRoutes.put(
   async (req, res) => {
     try {
       const { name, description, price, category, stock } = req.body;
+      const productId = req.params.id;
 
-      // Find the existing product to retrieve its current imageUrl
+      // Check if the product exists
       const existingProduct = await Product.findById(productId);
       if (!existingProduct) {
         return res.status(404).json({ error: "Product not found" });
       }
 
-      // Determine the image URL: keep the existing one if no new image is uploaded
-      const imageUrl = req.file ? req.file.path : existingProduct.imageUrl;
+      // Update image URL only if a new file is provided, otherwise keep the old one
+      let imageUrl = existingProduct.imageUrl;
+      if (req.file && req.file.path) {
+        imageUrl = req.file.path;
+      }
 
       const updatedProduct = await Product.findByIdAndUpdate(
-        req.params.id,
+        productId,
         {
           name: name || existingProduct.name,
           description: description || existingProduct.description,
           price: price || existingProduct.price,
           category: category || existingProduct.category,
           stock: stock || existingProduct.stock,
-          imageUrl: imageUrl,
+          imageUrl,
         },
         {
           new: true,
