@@ -21,7 +21,7 @@ productRoutes.post(
 
     try {
       const { name, description, price, category, stock } = req.body;
-      const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+      const imageUrl = req.file.path; //? `/uploads/${req.file.filename}` : "";
 
       const product = new Product({
         name,
