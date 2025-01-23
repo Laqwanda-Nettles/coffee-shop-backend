@@ -11,7 +11,7 @@ productRoutes.post(
   "/",
   auth,
   role("admin"),
-  upload,
+  upload.single("image"),
   validateProduct,
   async (req, res) => {
     if (!req.file) {
@@ -98,7 +98,7 @@ productRoutes.put(
   "/:id",
   auth,
   role("admin"),
-  upload,
+  upload.single("image"),
   validateProduct,
   async (req, res) => {
     try {
