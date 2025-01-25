@@ -21,7 +21,7 @@ productRoutes.post(
 
     try {
       const { name, description, price, category, stock } = req.body;
-      const imageUrl = req.file.path; //? `/uploads/${req.file.filename}` : "";
+      const imageUrl = req.file.path;
 
       const product = new Product({
         name,
@@ -33,9 +33,9 @@ productRoutes.post(
       });
 
       //save to database
-      await product.save();
+      const savedProduct = await product.save();
 
-      res.status(201).json(product);
+      res.status(201).json(savedProduct);
     } catch (error) {
       console.error("Error adding new product: ", error);
       res.status(400).json({ error: error.message });
