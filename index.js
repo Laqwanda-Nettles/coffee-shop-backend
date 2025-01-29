@@ -52,7 +52,7 @@ mongoose
 app.use("/auth", authRoutes);
 
 //Protected products route
-app.use("/products", auth, productRoutes);
+app.use("/products", productRoutes);
 
 //users route
 app.use("/users", auth, userRoutes);
