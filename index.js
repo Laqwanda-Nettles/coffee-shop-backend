@@ -11,10 +11,20 @@ const errorHandler = require("./middleware/errorHandler");
 const app = express();
 const port = process.env.PORT || 3000;
 
+const allowedOrigins = ["http://localhost:3000", "http://localhost:3001"];
+
 //Enable CORS with specific origin
 app.use(
   cors({
-    origin: "http://localhost:3000", //allows request from frontend
+    //origin: "http://localhost:3000", //allows request from frontend
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // Allow cookies, authorization headers, etc.
     methods: "GET, POST, PUT, DELETE, PATCH",
     allowedHeaders: "Content-Type,Authorization",
   })
@@ -42,7 +52,7 @@ mongoose
 app.use("/auth", authRoutes);
 
 //Protected products route
-app.use("/products", auth, productRoutes);
+app.use("/products", productRoutes);
 
 //users route
 app.use("/users", auth, userRoutes);
